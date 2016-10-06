@@ -292,7 +292,7 @@ class TextEditorPresenter
     row - (row % @tileSize)
 
   constrainRow: (row) ->
-    Math.max(0, Math.min(row, @model.getScreenLineCount()))
+    Math.max(0, Math.min(row, @model.getApproximateScreenLineCount()))
 
   getStartTileRow: ->
     @constrainRow(@tileForRow(@startRow ? 0))
@@ -301,14 +301,14 @@ class TextEditorPresenter
     @constrainRow(@tileForRow(@endRow ? 0))
 
   isValidScreenRow: (screenRow) ->
-    screenRow >= 0 and screenRow < @model.getScreenLineCount()
+    screenRow >= 0 and screenRow < @model.getApproximateScreenLineCount()
 
   getScreenRowsToRender: ->
     startRow = @getStartTileRow()
     endRow = @constrainRow(@getEndTileRow() + @tileSize)
 
     screenRows = [startRow...endRow]
-    longestScreenRow = @model.getLongestScreenRow()
+    longestScreenRow = @model.getApproximateLongestScreenRow()
     if longestScreenRow?
       screenRows.push(longestScreenRow)
     if @screenRowsToMeasure?
@@ -389,7 +389,7 @@ class TextEditorPresenter
       visibleTiles[tileStartRow] = true
       zIndex++
 
-    if @mouseWheelScreenRow? and 0 <= @mouseWheelScreenRow < @model.getScreenLineCount()
+    if @mouseWheelScreenRow? and 0 <= @mouseWheelScreenRow < @model.getApproximateScreenLineCount()
       mouseWheelTile = @tileForRow(@mouseWheelScreenRow)
 
       unless visibleTiles[mouseWheelTile]?
@@ -624,7 +624,7 @@ class TextEditorPresenter
     return unless @scrollTop? and @lineHeight? and @height?
 
     @endRow = Math.min(
-      @model.getScreenLineCount(),
+      @model.getApproximateScreenLineCount(),
       @lineTopIndex.rowForPixelPosition(@scrollTop + @height + @lineHeight - 1) + 1
     )
 
@@ -658,7 +658,7 @@ class TextEditorPresenter
   updateVerticalDimensions: ->
     if @lineHeight?
       oldContentHeight = @contentHeight
-      @contentHeight = Math.round(@lineTopIndex.pixelPositionAfterBlocksForRow(@model.getScreenLineCount()))
+      @contentHeight = Math.round(@lineTopIndex.pixelPositionAfterBlocksForRow(@model.getApproximateScreenLineCount()))
 
     if @contentHeight isnt oldContentHeight
       @updateHeight()
@@ -668,7 +668,7 @@ class TextEditorPresenter
   updateHorizontalDimensions: ->
     if @baseCharacterWidth?
       oldContentWidth = @contentWidth
-      rightmostPosition = @model.getRightmostScreenPosition()
+      rightmostPosition = @model.getApproximateRightmostScreenPosition()
       @contentWidth = @pixelPositionForScreenPosition(rightmostPosition).left
       @contentWidth += @scrollLeft
       @contentWidth += 1 unless @model.isSoftWrapped() # account for cursor width
